@@ -2,10 +2,15 @@ package trabalho1.microservices;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -144,5 +149,24 @@ public class Usuario {
     userExists.setTotalLogins(0);
     dao.save(userExists);
     return new ResponseEntity<String>("Senha alterada", HttpStatus.OK);
+  }
+
+@PostMapping("/desbloquear/{username}")
+@PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<String> unblockUser(@PathVariable String username) {
+    return username == null ? 
+        ResponseEntity.badRequest().body("Deve existir um usuário") : 
+        Optional.ofNullable(dao.findByUsername(username))
+            .map(user -> !user.isBlocked() ? 
+                ResponseEntity.badRequest().body("Usuário não está bloqueado") : 
+                desbloquearUsuario(user))
+            .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário inexistente"));
+  }
+
+  private ResponseEntity<String> desbloquearUsuario(UsuarioBean user) {
+    user.setTotalFails(0);
+    user.setBlocked(false);
+    dao.save(user);
+    return ResponseEntity.ok("Usuário foi desbloqueado");
   }
 }

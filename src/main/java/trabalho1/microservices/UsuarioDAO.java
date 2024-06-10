@@ -11,13 +11,13 @@ public interface UsuarioDAO extends CrudRepository<UsuarioBean, Integer> {
 
     Iterable<UsuarioBean> findByUsernameAndPassword(String username, String senha);
 
-    UsuarioBean[] findByBlockedTrue();
+     UsuarioBean[] findByBlockedTrue();
 
-    Iterable<UsuarioBean> findByCursoAndTurma(String curso, String turma);
+    // Iterable<UsuarioBean> findByCursoAndTurma(String curso, String turma);
 
-    Iterable<UsuarioBean> findByNomeLike(String nome);
+    // Iterable<UsuarioBean> findByNomeLike(String nome);
 
-    @Query("select a.id from TAB_ALUNO a")
-    Iterable<Integer> minhaConsulta();
+    // @Query("select a.id from TAB_ALUNO a")
+    // Iterable<Integer> minhaConsulta();
 
 }
