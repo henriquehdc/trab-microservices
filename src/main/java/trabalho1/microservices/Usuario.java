@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,6 +22,9 @@ public class Usuario {
 
   @Autowired
   private UsuarioDAO dao;
+
+  @Autowired
+  private KafkaTemplate<String, String> kafkaTemplate;
 
   @PostMapping
   public ResponseEntity<String> createUser(@RequestBody UsuarioBean user) throws DupedIdException {
@@ -91,6 +95,8 @@ public class Usuario {
         userExists.setBlocked(true);
         System.out.println("Usuário bloqueado");
       }
+
+      kafkaTemplate.send("logins-invalidos", user.getUsername());
 
       dao.save(userExists);
       return new ResponseEntity<String>("Senha incorreta",
